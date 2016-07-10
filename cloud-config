@@ -13,10 +13,14 @@
 #
 # Note, that the list has to be proper yaml, so you have to quote
 # any characters yaml would eat (':' can be problematic)
+package_upgrade: true
+
+packages:
+ - python-dev
+ - git-core
+ - python-virtualenv
+ - g++
+
 runcmd:
- - [ ls, -l, / ]
- - [ sh, -xc, "echo $(date) ': hello world!'" ]
- - [ sh, -c, echo "=========hello world'=========" ]
- - ls -l /root
- - [ wget, "http://slashdot.org", -O, /tmp/index.html ]
- - cp /tmp/index.html /tmp/index2.html
+ - [ wget, "https://raw.githubusercontent.com/phelpsw/servercfg/master/setup.sh", -O, /tmp/setup.sh ]
+ - [ bash, /tmp/setup.sh ]
