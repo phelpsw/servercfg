@@ -30,6 +30,6 @@ power_state:
  delay: "+1"
  mode: reboot
  message: Bye Bye
- timeout: 300
+ timeout: 600
  condition: True
 
