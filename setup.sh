@@ -14,7 +14,7 @@ sed 's|public_url = http://localhost:5000/|public_url = http://localhost:5000/|'
 sed 's|#sqluri = sqlite:////tmp/syncserver.db|sqluri = sqlite:////tmp/syncserver.db|' <tmp.ini >syncserver.ini
 
 # Ideally would create upstart file here but to avoid 
-cat > /etc/init/syncserver <<'endmsg'
+cat > /etc/init/syncserver.conf <<'endmsg'
 description "Mozilla Firefox sync server"
 
 start on (local-filesystems and net-device-up IFACE!=lo)
