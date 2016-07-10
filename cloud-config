@@ -20,7 +20,16 @@ packages:
  - git-core
  - python-virtualenv
  - g++
+ - nginx
 
 runcmd:
  - [ wget, "https://raw.githubusercontent.com/phelpsw/servercfg/master/setup.sh", -O, /tmp/setup.sh ]
  - [ bash, /tmp/setup.sh ]
+
+power_state:
+ delay: "+1"
+ mode: reboot
+ message: Bye Bye
+ timeout: 300
+ condition: True
+
