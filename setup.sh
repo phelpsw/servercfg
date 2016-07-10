@@ -5,15 +5,14 @@ cd /home/ubuntu/syncserver
 make build
 make test
 
-echo "working directory"
-pwd
+SYNCPORT=8000
+SYNCHOST="argus.williamslabs.com"
+KEY=`head -c 20 /dev/urandom | sha1sum | awk '{print $1}'`
+sed "s|public_url = http://localhost:5000/|public_url = http://$(SYNCHOST):$(SYNCPORT)/|" <syncserver.ini >tmp.ini
+sed 's|#sqluri = sqlite:////tmp/syncserver.db|sqluri = sqlite:////tmp/syncserver.db|' <tmp.ini >tmp2.ini
+sed "s/#secret = INSERT_SECRET_KEY_HERE/secret = $(KEY)/" <tmp2.ini >syncserver.ini
+rm tmp.ini tmp2.ini
 
-# TODO: fix public url to match reality
-# TODO: Generate key
-sed 's|public_url = http://localhost:5000/|public_url = http://localhost:5000/|' <syncserver.ini >tmp.ini
-sed 's|#sqluri = sqlite:////tmp/syncserver.db|sqluri = sqlite:////tmp/syncserver.db|' <tmp.ini >syncserver.ini
-
-# Ideally would create upstart file here but to avoid 
 cat > /etc/init/syncserver.conf <<'endmsg'
 description "Mozilla Firefox sync server"
 
@@ -31,4 +30,6 @@ exec make serve
 respawn
 endmsg
 
-# TODO: Reboot or start service
+# Start service
+start syncserver
+
