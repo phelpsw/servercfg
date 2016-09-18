@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Set to make certbot not grab a permanent certificate (which has a quota)
+debug=0
+
 # Stop processes we are about to modify
 service nginx stop
 
@@ -61,8 +64,14 @@ ln -s /etc/nginx/sites-available/syncserver /etc/nginx/sites-enabled/default
 cd /home/ubuntu
 wget https://dl.eff.org/certbot-auto
 chmod a+x certbot-auto
-./certbot-auto --non-interactive --agree-tos --email admin@williamslabs.com certonly --standalone -d argus.williamslabs.com
-
+if [ $debug -eq 1 ]
+then
+    ./certbot-auto --staging --non-interactive --agree-tos --email admin@williamslabs.com \
+        certonly --standalone -d argus.williamslabs.com
+else
+    ./certbot-auto --non-interactive --agree-tos --email admin@williamslabs.com \
+        certonly --standalone -d argus.williamslabs.com
+fi
 # Add certbot cronjob to ubuntu crontab
 crontab -l -u root > /tmp/crondump
 echo "17 * * * * /home/ubuntu/certbot-auto renew --standalone --non-interactive --pre-hook 'service nginx stop' --post-hook 'service nginx start' --quiet" >> /tmp/crondump

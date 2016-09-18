@@ -10,6 +10,9 @@ packages:
  - nginx
 
 runcmd:
+ - mkdir /data
+ - echo "/dev/xvdb /data ext4 defaults,nobootwait 0 0" >> /etc/fstab
+ - mount -a
  - [ wget, "https://raw.githubusercontent.com/phelpsw/servercfg/master/setup.sh", -O, /tmp/setup.sh ]
  - [ bash, /tmp/setup.sh ]
 
