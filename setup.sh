@@ -52,7 +52,7 @@ EOF
 cat > /etc/nginx/sites-available/syncserver << 'endmsg'
 server {
     listen  443 ssl;
-    server_name $SYNCHOST;
+    server_name __SYNCHOST__;
 
     ssl_certificate /etc/letsencrypt/live/__SYNCHOST__/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/__SYNCHOST__/privkey.pem;
