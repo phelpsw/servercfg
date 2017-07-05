@@ -3,11 +3,7 @@
 # Set to make certbot not grab a permanent certificate (which has a quota)
 # For development purposes hitting this certificate quota will cause problems.
 # Note these certs won't be valid but they won't hit the quota
-debug=1
-
-# Install dependencies of the firefox sync server
-apt-get install git-core python2.7 python2.7-dev python-virtualenv \
-    make g++ nginx
+debug=0
 
 DB_ID="utilitydb"
 SYNCHOST="argus.williamslabs.com"
