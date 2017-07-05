@@ -4,13 +4,6 @@ package_upgrade: true
 
 packages:
  - unattended-upgrades
- - git-core
- - python2.7
- - python2.7-dev
- - python-virtualenv
- - make
- - g++
- - nginx
 
 runcmd:
  - [ wget, "https://raw.githubusercontent.com/phelpsw/servercfg/master/setup.sh", -O, /tmp/setup.sh ]

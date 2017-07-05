@@ -5,6 +5,10 @@
 # Note these certs won't be valid but they won't hit the quota
 debug=1
 
+# Install dependencies of the firefox sync server
+apt-get install git-core python2.7 python2.7-dev python-virtualenv \
+    make g++ nginx
+
 DB_ID="utilitydb"
 SYNCHOST="argus.williamslabs.com"
 
@@ -24,10 +28,12 @@ make build
 
 KEY=`head -c 20 /dev/urandom | sha1sum | awk '{print $1}'`
 sed "s|host = 0.0.0.0|host = 127.0.0.1|" <syncserver.ini >tmp.ini
-sed "s|public_url = http://localhost:5000/|public_url = https://$SYNCHOST/|" <tmp.ini >tmp1.ini
-sed 's|#sqluri = sqlite:////tmp/syncserver.db|sqluri = sqlite:////tmp/syncserver.db|' <tmp1.ini >tmp2.ini
+sed "s|public_url = http://localhost:5000/|public_url = https://argus.williamslabs.com/|" <tmp.ini >tmp1.ini
+sed 's|#sqluri = sqlite:////tmp/syncserver.db|sqluri = postgresql://dbuser:dbpass@utilitydb.ceddh3kqpgak.us-west-2.rds.amazonaws.com:5432/ffsync|' <tmp1.ini >tmp2.ini
 sed "s/#secret = INSERT_SECRET_KEY_HERE/secret = $KEY/" <tmp2.ini >syncserver.ini
 rm tmp.ini tmp1.ini tmp2.ini
+
+/home/ubuntu/syncserver/local/bin/pip install psycopg2
 EOF
 
 
