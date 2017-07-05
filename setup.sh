@@ -1,48 +1,61 @@
 #!/bin/bash
 
 # Set to make certbot not grab a permanent certificate (which has a quota)
-debug=0
+# For development purposes hitting this certificate quota will cause problems.
+# Note these certs won't be valid but they won't hit the quota
+debug=1
+
+DB_ID="utilitydb"
+SYNCHOST="argus.williamslabs.com"
+
+
+#RDS_QUERY="aws rds describe-db-instances --region=${EC2_REGION} --db-instance-identifier=${DB_ID}"
+#DB_HOST=`$RDS_QUERY --query 'DBInstances[0].Endpoint.Address'`
+#DB_PORT=`$RDS_QUERY --query 'DBInstances[0].Endpoint.Port'`
 
 # Stop processes we are about to modify
-service nginx stop
+systemctl stop nginx
 
+cd /home/ubuntu
+su ubuntu << 'EOF'
 git clone https://github.com/mozilla-services/syncserver /home/ubuntu/syncserver
 cd /home/ubuntu/syncserver
 make build
-make test
 
-SYNCHOST="argus.williamslabs.com"
 KEY=`head -c 20 /dev/urandom | sha1sum | awk '{print $1}'`
 sed "s|host = 0.0.0.0|host = 127.0.0.1|" <syncserver.ini >tmp.ini
 sed "s|public_url = http://localhost:5000/|public_url = https://$SYNCHOST/|" <tmp.ini >tmp1.ini
 sed 's|#sqluri = sqlite:////tmp/syncserver.db|sqluri = sqlite:////tmp/syncserver.db|' <tmp1.ini >tmp2.ini
 sed "s/#secret = INSERT_SECRET_KEY_HERE/secret = $KEY/" <tmp2.ini >syncserver.ini
 rm tmp.ini tmp1.ini tmp2.ini
+EOF
 
-cat > /etc/init/syncserver.conf <<'endmsg'
-description "Mozilla Firefox sync server"
 
-start on (local-filesystems and net-device-up IFACE!=lo)
-stop on runlevel [!2345]
+cat > /lib/systemd/system/ffsync.service << 'EOF'
+[Unit]
+Description=gunicorn server running Mozilla's Firefox Sync Server
+After=syslog.target network.target
 
-env STNORESTART=yes
-env HOME=/home/ubuntu
-setuid "ubuntu"
-setgid "ubuntu"
+[Service]
+Type=simple
+User=ubuntu
+Group=ubuntu
+UMask=007
+Restart=on-abort
+ExecStart=/home/ubuntu/syncserver/local/bin/gunicorn --paste /home/ubuntu/syncserver/syncserver.ini
 
-chdir /home/ubuntu/syncserver
-exec make serve
+[Install]
+WantedBy=multi-user.target
+EOF
 
-respawn
-endmsg
 
 cat > /etc/nginx/sites-available/syncserver << 'endmsg'
 server {
     listen  443 ssl;
-    server_name argus.williamslabs.com;
+    server_name $SYNCHOST;
 
-    ssl_certificate /etc/letsencrypt/live/argus.williamslabs.com/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/argus.williamslabs.com/privkey.pem;
+    ssl_certificate /etc/letsencrypt/live/$SYNCHOST/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/$SYNCHOST/privkey.pem;
 
     location / {
         proxy_set_header Host $http_host;
@@ -66,12 +79,13 @@ wget https://dl.eff.org/certbot-auto
 chmod a+x certbot-auto
 if [ $debug -eq 1 ]
 then
-    ./certbot-auto --staging --non-interactive --agree-tos --email admin@williamslabs.com \
-        certonly --standalone -d argus.williamslabs.com
+    ./certbot-auto --staging --non-interactive --agree-tos --email root@williamslabs.com \
+        certonly --standalone -d $SYNCHOST
 else
-    ./certbot-auto --non-interactive --agree-tos --email admin@williamslabs.com \
-        certonly --standalone -d argus.williamslabs.com
+    ./certbot-auto --non-interactive --agree-tos --email root@williamslabs.com \
+        certonly --standalone -d $SYNCHOST
 fi
+
 # Add certbot cronjob to ubuntu crontab
 crontab -l -u root > /tmp/crondump
 echo "17 * * * * /home/ubuntu/certbot-auto renew --standalone --non-interactive --pre-hook 'service nginx stop' --post-hook 'service nginx start' --quiet" >> /tmp/crondump
@@ -79,6 +93,6 @@ crontab -u root /tmp/crondump
 rm /tmp/crondump
 
 # Start service
-start syncserver
-service nginx start
+systemctl start ffsync
+systemctl start nginx
 

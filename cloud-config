@@ -3,23 +3,23 @@
 package_upgrade: true
 
 packages:
- - python-dev
+ - unattended-upgrades
  - git-core
+ - python2.7
+ - python2.7-dev
  - python-virtualenv
+ - make
  - g++
  - nginx
 
 runcmd:
- - mkdir /data
- - echo "/dev/xvdb /data ext4 defaults,nobootwait 0 0" >> /etc/fstab
- - mount -a
  - [ wget, "https://raw.githubusercontent.com/phelpsw/servercfg/master/setup.sh", -O, /tmp/setup.sh ]
  - [ bash, /tmp/setup.sh ]
 
 power_state:
  delay: "+1"
  mode: reboot
- message: Bye Bye
+ message: First boot setup complete, rebooting
  timeout: 600
  condition: True
 
