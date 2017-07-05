@@ -51,7 +51,7 @@ WantedBy=multi-user.target
 EOF
 
 
-cat > /etc/nginx/sites-available/syncserver << 'endmsg'
+cat > /tmp/syncserver << 'endmsg'
 server {
     listen  443 ssl;
     server_name __SYNCHOST__;
@@ -71,7 +71,7 @@ server {
     }
 }
 endmsg
-sed "s/__SYNCHOST__/${SYNCHOST}/" </etc/nginx/sites-available/syncserver >/etc/nginx/sites-available/syncserver
+sed "s/__SYNCHOST__/${SYNCHOST}/" </tmp/syncserver >/etc/nginx/sites-available/syncserver
 
 
 rm /etc/nginx/sites-enabled/default
