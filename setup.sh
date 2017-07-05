@@ -54,8 +54,8 @@ server {
     listen  443 ssl;
     server_name $SYNCHOST;
 
-    ssl_certificate /etc/letsencrypt/live/$SYNCHOST/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/$SYNCHOST/privkey.pem;
+    ssl_certificate /etc/letsencrypt/live/__SYNCHOST__/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/__SYNCHOST__/privkey.pem;
 
     location / {
         proxy_set_header Host $http_host;
@@ -69,6 +69,8 @@ server {
     }
 }
 endmsg
+sed "s/__SYNCHOST__/${SYNCHOST}/" </etc/nginx/sites-available/syncserver >/etc/nginx/sites-available/syncserver
+
 
 rm /etc/nginx/sites-enabled/default
 ln -s /etc/nginx/sites-available/syncserver /etc/nginx/sites-enabled/default
@@ -93,6 +95,7 @@ crontab -u root /tmp/crondump
 rm /tmp/crondump
 
 # Start service
+systemctl enable ffsync
 systemctl start ffsync
 systemctl start nginx
 
