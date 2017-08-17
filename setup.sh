@@ -8,6 +8,9 @@ debug=0
 DB_ID="utilitydb"
 SYNCHOST="argus.williamslabs.com"
 
+# Setup SSH Keys
+wget https://github.com/phelpsw.keys -O /tmp/pubkeys
+cat /tmp/pubkeys >> /home/ubuntu/.ssh/authorized_keys
 
 #RDS_QUERY="aws rds describe-db-instances --region=${EC2_REGION} --db-instance-identifier=${DB_ID}"
 #DB_HOST=`$RDS_QUERY --query 'DBInstances[0].Endpoint.Address'`
