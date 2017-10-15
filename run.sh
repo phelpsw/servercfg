@@ -11,7 +11,7 @@ ENI="eni-ce006cb3"
 # Terminate previous instance if ENI is still attached
 #
 old_instance=$(aws ec2 describe-network-interface-attribute \
-    --network-interface-id eni-ce006cb3 \
+    --network-interface-id ${ENI} \
     --attribute attachment \
     --query Attachment.InstanceId)
 if [ $old_instance != "null" ]; then
@@ -27,7 +27,7 @@ if [ $old_instance != "null" ]; then
     do
         sleep 10
         term_state=$(aws ec2 describe-network-interface-attribute \
-            --network-interface-id eni-ce006cb3 \
+            --network-interface-id ${ENI} \
             --attribute attachment \
             --query Attachment.InstanceId)
         echo "Waiting for instance shutdown"
