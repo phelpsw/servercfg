@@ -4,11 +4,19 @@
 wget https://github.com/phelpsw.keys -O /tmp/pubkeys
 cat /tmp/pubkeys >> /home/ubuntu/.ssh/authorized_keys
 
+aws s3 cp s3://phelps-swim-data/id_rsa /tmp/id_rsa
+mv /tmp/id_rsa /home/ubuntu/.ssh/
+chmod 600 /home/ubuntu/.ssh/id_rsa
+chown ubuntu:ubuntu /home/ubuntu/.ssh/id_rsa
+
+
 # Setup secrets
 aws s3 cp s3://phelps-swim-data/ipsec.secrets /etc/
 aws s3 cp s3://phelps-swim-data/ipsec.conf /etc/
 chmod 600 /etc/ipsec.secrets
 chmod 600 /etc/ipsec.conf
+
+
 
 systemctl restart strongswan
 
