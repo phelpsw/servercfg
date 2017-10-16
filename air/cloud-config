@@ -5,6 +5,7 @@ package_upgrade: true
 packages:
  - unattended-upgrades
  - git-core
+ - awscli
  - strongswan
 
 runcmd:

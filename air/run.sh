@@ -15,6 +15,8 @@ AMI=`curl -s "https://cloud-images.ubuntu.com/locator/ec2/releasesTable" \
 # Parameters
 KEY="supernova_5_12_2017"
 ENI="eni-12df6c10"
+NAME="SWIM-VPN"
+INSTANCE_PROFILE_NAME="swim-vpn-instance-profile"
 
 #
 # Terminate previous instance if ENI is still attached
@@ -34,7 +36,7 @@ if [ $old_instance != "null" ]; then
     term_state=""
     while [[ $term_state != "null" ]]
     do
-        sleep 10
+        sleep 30
         term_state=$(aws ec2 describe-network-interface-attribute \
             --network-interface-id ${ENI} \
             --attribute attachment \
@@ -44,11 +46,12 @@ if [ $old_instance != "null" ]; then
 fi
 
 #
-# ENI Should now be available
+# ENI Should now be available, create the instance
 #
 instance_id=$(aws ec2 run-instances --image-id ${AMI} \
     --count 1 --instance-type t2.micro \
     --key-name ${KEY} --user-data=file://cloud-config \
+    --iam-instance-profile "{ \"Name\": \"${INSTANCE_PROFILE_NAME}\" }" \
     --network-interfaces "[ { \"NetworkInterfaceId\": \"${ENI}\", \"DeviceIndex\": 0 } ]" \
     --query 'Instances[0].InstanceId')
 
@@ -60,15 +63,19 @@ fi
 
 echo "Created instance id $instance_id"
 
+
 # Wait until instance is running
 state=""
 while [[ $state != "running" ]]
 do
-    sleep 5
+    sleep 30
     state=$(aws ec2 describe-instances --filter "Name=instance-id,Values=$instance_id" \
         --query 'Reservations[0].Instances[0].State.Name' --output text)
     echo $state
 done
+
+# Tag the instance with a helpful name
+aws ec2 create-tags --resources $instance_id --tags "Key=Name,Value=${NAME}"
 
 #
 # Print helpful login details
