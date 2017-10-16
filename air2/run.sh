@@ -16,6 +16,7 @@ AMI=`curl -s "https://cloud-images.ubuntu.com/locator/ec2/releasesTable" \
 KEY="supernova_5_12_2017"
 ENI="eni-8a358788"
 NAME="SWIM-CLIENT"
+INSTANCE_PROFILE_NAME="swim-vpn-instance-profile"
 
 #
 # Terminate previous instance if ENI is still attached
@@ -50,6 +51,7 @@ fi
 instance_id=$(aws ec2 run-instances --image-id ${AMI} \
     --count 1 --instance-type t2.micro \
     --key-name ${KEY} --user-data=file://cloud-config \
+    --iam-instance-profile "{ \"Name\": \"${INSTANCE_PROFILE_NAME}\" }" \
     --network-interfaces "[ { \"NetworkInterfaceId\": \"${ENI}\", \"DeviceIndex\": 0 } ]" \
     --query 'Instances[0].InstanceId')
 
