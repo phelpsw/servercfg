@@ -1,0 +1,20 @@
+#cloud-config
+
+package_upgrade: true
+
+packages:
+ - unattended-upgrades
+ - git-core
+ - awscli
+
+runcmd:
+ - [ wget, "https://raw.githubusercontent.com/phelpsw/servercfg/master/air2/setup.sh", -O, /tmp/setup.sh ]
+ - [ bash, /tmp/setup.sh ]
+
+power_state:
+ delay: "+1"
+ mode: reboot
+ message: First boot setup complete, rebooting
+ timeout: 600
+ condition: True
+
