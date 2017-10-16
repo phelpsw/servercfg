@@ -72,7 +72,6 @@ do
     echo $state
 done
 
-sleep 60
 # Tag the instance with a helpful name
 aws ec2 create-tags --resources $instance_id --tags "Key=Name,Value=${NAME}"
 
